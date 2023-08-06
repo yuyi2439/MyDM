@@ -1,13 +1,16 @@
 [tool.poetry]
 name = "mydm"
-version = "0.0.1a1"
-description = "A qq chatbot framework"
+version = "0.0.1"
+description = "一个使用OneBot v11/12协议的机器人框架"
 authors = ["yuyi2439 <yuyi2439@qq.com>"]
 license = "Apache-2.0"
 readme = "README.md"
+homepage = "https://github.com/yuyi2439/MyDM"
+repository = "https://github.com/yuyi2439/MyDM"
 
 [tool.poetry.dependencies]
 python = "^3.9"
+aiohttp = "^3.8.5"
 
 
 [build-system]
