@@ -4,7 +4,7 @@ from mydm.interactor import WebSocket
 class GoCqhttp(WebSocket):
     async def send(self, action: str, params: dict|None = None):
         if self.conn == False:
-            raise ConnectionError('Connection is closed.')
+            raise ConnectionError('连接未启动')
         if params == None:
             params = {}
         data = {
