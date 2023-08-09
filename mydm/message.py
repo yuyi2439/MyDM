@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 
-from typing import Iterable, Literal
+from typing import Literal
 from .exceptions import DataFormatError
 
 
@@ -19,12 +19,21 @@ class MessageSegment(dict):
         """
         从dict构建MessageSegment
         """
-        super().__init__(data)
+        if isinstance(data, MessageSegment):
+            self = data
+        else:
+            super().__init__(data)
         try:
             _ = self.type
         except KeyError as e:
             raise DataFormatError(e)
-
+    
+    def __add__(self, other) -> 'Message':
+        """
+        合并MessageSegment
+        """
+        return Message(self, other)
+    
     @property
     def type(self) -> Literal['text', 'face', 'record', 'video', 'at', 'share', 'image', 'reply', 'xml', 'json']:
         """消息段类型"""
@@ -93,19 +102,26 @@ class MessageSegmentSend(MessageSegment):
 
 
 class Message(list[MessageSegment]):
-    def __init__(self, data: Iterable):
+    def __init__(self, *data):
         """
-        从dict构建MessageSegmentSend
+        从dict构建Message
         """
-        segments = []
+        if not data:
+            raise DataFormatError('data is empty')
+        super().__init__()
         for segment in data:
             if isinstance(segment, Message):
-                segments.extend(segment)
+                self.extend(segment)
             elif isinstance(segment, MessageSegment):
-                segments.append(segment)
+                self.append(segment)
+            elif isinstance(segment, (list, tuple)):
+                self.extend(MessageSegment(s) for s in segment)
             elif isinstance(segment, dict):
-                segments.append(MessageSegment(segment))
+                self.append(MessageSegment(segment))
             else:
-                raise TypeError(
-                    f'{segment} is not a MessageSegment or Message')
-        super().__init__(segments)
+                raise DataFormatError(f'{segment} is not a MessageSegment or Message')
+
+    def __add__(self, other):
+        """合并Message"""
+        return Message(self, other)
+    

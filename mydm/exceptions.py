@@ -30,5 +30,5 @@ class WebSocketNotConnected(Exception):
     """WebSocket未连接"""
 
 
-class DataFormatError(Exception):
-    """Event格式错误"""
+class DataFormatError(TypeError):
+    """数据格式错误"""

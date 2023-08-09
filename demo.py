@@ -17,10 +17,17 @@ async def echo(event: 'Event'):
         if event.message_type == 'group':
             await interactor.call(
                 'send_group_msg', group_id=event['group_id'],
-                message=Message([
-                    MessageSegmentSend.at(event.sender.user_id),
-                    event.message
-                ])
+                
+                # message=Message(
+                #     MessageSegmentSend.at(event.sender.user_id),
+                #     event.message
+                # )
+                
+                # 更推荐这种写法，看着简洁
+                message=
+                    MessageSegmentSend.at(event.sender.user_id)
+                    + event.message
+                
             )
 
 
@@ -28,7 +35,6 @@ async def main():
     interactor.handlers.append(print_event)
     interactor.handlers.append(echo)
     await interactor.connect()
-    print(await interactor.call('get_login_info'))
 
 
 asyncio.get_event_loop().create_task(main())
