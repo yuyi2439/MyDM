@@ -4,15 +4,18 @@
 
 import asyncio
 import sys
-from typing import Any
 
 from .exceptions import ApiCallTimeout
+
+__all__ = [
+    'EchoHandler',
+]
 
 
 class EchoHandler:
     _seq = 0
     _echos: dict[int, asyncio.Future] = {}
-    
+
     @classmethod
     def next(cls) -> int:
         """获取下一个echo号"""
@@ -25,20 +28,21 @@ class EchoHandler:
         """设置echo"""
         echo = data.get('echo')
         if isinstance(echo, int):
-            future = cls._echos.get(echo)
-            if future:
-                future.set_result(data)
-    
+            future = cls._echos[echo]
+            future.set_result(data)
+
+    @classmethod
+    def add_fut(cls, echo: int):
+        future = asyncio.get_event_loop().create_future()
+        cls._echos[echo] = future
+
     @classmethod
     async def wait(cls, echo: int, timeout: float) -> dict:
         """等待echo被set，返回整条消息"""
-        future = asyncio.get_event_loop().create_future()
-        cls._echos[echo] = future
+        future = cls._echos[echo]
         try:
-            await asyncio.wait_for(future, timeout)
-            return future.result()
+            return await asyncio.wait_for(future, timeout)
         except asyncio.TimeoutError:
             raise ApiCallTimeout
         finally:
             cls._echos.pop(echo)
-
