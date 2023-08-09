@@ -27,13 +27,13 @@ class MessageSegment(dict):
             _ = self.type
         except KeyError as e:
             raise DataFormatError(e)
-    
+
     def __add__(self, other) -> 'Message':
         """
         合并MessageSegment
         """
         return Message(self, other)
-    
+
     @property
     def type(self) -> Literal['text', 'face', 'record', 'video', 'at', 'share', 'image', 'reply', 'xml', 'json']:
         """消息段类型"""
@@ -79,7 +79,7 @@ class MessageSegmentSend(MessageSegment):
         return self['type']
 
     @staticmethod
-    def build(type: str, **data):
+    def build(type: str, **data):  # TODO 下面的CQ码构造并没有写全，参考https://docs.go-cqhttp.org/cqcode/
         """
         构建MessageSegmentSend
         """
@@ -89,9 +89,22 @@ class MessageSegmentSend(MessageSegment):
         })
 
     @staticmethod
-    def at(qq: int | Literal['all'], name: str = ''):
+    def text(text: str):
+        """纯文本
+        - `text`: 文本
         """
-        @某人
+        return MessageSegmentSend.build('text', text=text)
+
+    @staticmethod
+    def face(id: int):
+        """QQ 表情
+        - `id`: QQ 表情 ID，参考https://github.com/kyubotics/coolq-http-api/wiki/%E8%A1%A8%E6%83%85-CQ-%E7%A0%81-ID-%E8%A1%A8
+        """
+        return MessageSegmentSend.build('face', id=id)
+
+    @staticmethod
+    def at(qq: int | Literal['all'], name: str = ''):
+        """@某人
         - `qq`: @的 QQ 号, all 表示全体成员
         - `name`: 当在群中找不到此QQ号的名称时才会生效
         """
@@ -119,9 +132,9 @@ class Message(list[MessageSegment]):
             elif isinstance(segment, dict):
                 self.append(MessageSegment(segment))
             else:
-                raise DataFormatError(f'{segment} is not a MessageSegment or Message')
+                raise DataFormatError(
+                    f'{segment} is not a MessageSegment or Message')
 
     def __add__(self, other):
         """合并Message"""
         return Message(self, other)
-    

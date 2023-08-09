@@ -1,7 +1,7 @@
 import asyncio
 
 from mydm.event import Event, EventMessage
-from mydm.message import MessageSegmentSend, Message
+from mydm.message import MessageSegmentSend
 from mydm.interactor import InteractorWebSocket
 
 interactor = InteractorWebSocket('ws://192.168.0.102:8080')
@@ -17,17 +17,8 @@ async def echo(event: 'Event'):
         if event.message_type == 'group':
             await interactor.call(
                 'send_group_msg', group_id=event['group_id'],
-                
-                # message=Message(
-                #     MessageSegmentSend.at(event.sender.user_id),
-                #     event.message
-                # )
-                
-                # 更推荐这种写法，看着简洁
-                message=
-                    MessageSegmentSend.at(event.sender.user_id)
-                    + event.message
-                
+                message=MessageSegmentSend.at(event.sender.user_id)
+                + event.message
             )
 
 
