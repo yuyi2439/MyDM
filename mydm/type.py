@@ -21,7 +21,7 @@ __all__ = [
 
 class ApiResponse(dict):
     def __init__(
-            self, resp: dict | str
+        self, resp: dict | str
     ):
         super().__init__()
         if isinstance(resp, str):

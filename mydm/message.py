@@ -30,12 +30,12 @@ class MessageSegment(dict):
 
     def __add__(self, other) -> 'Message':
         """
-        合并MessageSegment
+        合并Message
         """
         return Message(self, other)
 
     @property
-    def type(self) -> Literal['text', 'face', 'record', 'video', 'at', 'share', 'image', 'reply', 'xml', 'json']:
+    def type(self) -> Literal['text', 'face', 'record', 'video', 'at', 'share', 'image', 'reply', 'xml', 'json', 'redbag', 'forward', 'share', 'music', 'poke', 'gift', 'node', 'cardimage', 'tts']:
         """消息段类型"""
         return self['type']
 

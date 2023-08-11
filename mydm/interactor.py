@@ -23,7 +23,7 @@ except ImportError:
 from .type import ApiResponse
 from .utils import EchoHandler
 from .event import Event
-from .exceptions import WebSocketConnected, WebSocketNotConnected
+from .exceptions import WebSocketNotConnected
 
 __all__ = [
     'Interactor',
@@ -37,8 +37,8 @@ __all__ = [
 
 class Interactor:
     def __init__(
-            self, url: str, *,
-            access_token: str = '',
+        self, url: str, *,
+        access_token: str = '',
     ):
 
         self.url = url
@@ -48,9 +48,9 @@ class Interactor:
 
 class InteractorApi(Interactor, ABC):
     def __init__(
-            self, url: str, *,
-            access_token: str = '',
-            timeout: float = 10
+        self, url: str, *,
+        access_token: str = '',
+        timeout: float = 10
     ):
         super().__init__(url, access_token=access_token)
         # 默认超时时长为10秒
@@ -63,8 +63,8 @@ class InteractorApi(Interactor, ABC):
 
 class InteractorEvent(Interactor, ABC):
     def __init__(
-            self, url: str, *,
-            access_token: str = '',
+        self, url: str, *,
+        access_token: str = '',
     ):
         super().__init__(url, access_token=access_token)
         self.handlers: list[Callable[['Event'], Any]] = []
@@ -95,26 +95,21 @@ class InteractorHttpEvent(InteractorApi):
 
 class InteractorWebSocket(InteractorApi, InteractorEvent):
     def __init__(
-            self, url: str, *,
-            access_token: str = '',
-            timeout: float = 10
+        self, url: str, *,
+        access_token: str = '',
+        timeout: float = 10
     ):
         super().__init__(url, access_token=access_token, timeout=timeout)
         self.conn = False
 
     async def connect(self):
-        if self.conn:
-            raise WebSocketConnected
-
         self.ws_session = await self.session.ws_connect(self.url)
         self.conn = True
-
         await self.receive()
 
     async def close(self):
         if not self.conn:
             raise WebSocketNotConnected
-
         await self.ws_session.close()
         self.conn = False
 
@@ -142,8 +137,7 @@ class InteractorWebSocket(InteractorApi, InteractorEvent):
                 # 正常上报
                 event = Event(data)
                 if isinstance(event, Event):
-                    asyncio.gather(*[handler(event)
-                                   for handler in self.handlers])
+                    asyncio.gather(handler(event) for handler in self.handlers)
             else:
                 # echo上报
                 EchoHandler.set(data)

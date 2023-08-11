@@ -9,23 +9,19 @@ Bot提供on（及其附属）装饰器，接收优先级，并注册handler
 from typing import Any, Callable
 
 from .event import Event
-from .interactor import InteractorEvent
 from .exceptions import TruncateEventProcessing
 
 
 class Bot:
-    def __init__(self, interactor: InteractorEvent):
-        self.interactor = interactor
-        self.interactor.handlers.append(self)
-
+    def __init__(self):
         self.handlers: list[Callable[['Event'], Any]] = []
-    
+
     def __call__(self, event: 'Event'):
         try:
             for handler in self.handlers:
                 handler(event)
         except TruncateEventProcessing:
             pass
-    
+
     def on(self, priority: int, handler: Callable):
         pass  # TODO

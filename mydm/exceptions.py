@@ -5,7 +5,6 @@
 __all__ = [
     'ApiCallFailed',
     'ApiCallTimeout',
-    'WebSocketConnected',
     'WebSocketNotConnected',
     'DataFormatError',
 ]
@@ -20,10 +19,6 @@ class ApiCallFailed(Exception):
 
 class ApiCallTimeout(BaseException):
     """Api调用超时"""
-
-
-class WebSocketConnected(Exception):
-    """WebSocket已连接"""
 
 
 class WebSocketNotConnected(Exception):
