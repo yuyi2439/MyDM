@@ -1,31 +1,31 @@
 import asyncio
 
+from mydm.bot import Bot
 from mydm.event import Event, EventMessage
 from mydm.message import MessageSegmentSend
 from mydm.interactor import InteractorWebSocket
 
-interactor = InteractorWebSocket('ws://192.168.0.102:8080')
+itat = InteractorWebSocket('ws://192.168.0.102:8080')
+bot = Bot()
 
 
+@bot.on()
 async def print_event(event: 'Event'):
     print(event)
 
 
-async def echo(event: 'Event'):
-    if event.post_type == 'message':
-        event = EventMessage(event)
-        if event.message_type == 'group':
-            await interactor.call(
-                'send_group_msg', group_id=event['group_id'],
-                message=MessageSegmentSend.at(event.sender.user_id)
-                + event.message
-            )
+@bot.on(post_type='message', message_type='group')
+async def echo(event: 'EventMessage'):
+    await itat.call(
+        'send_group_msg',
+        group_id=event['group_id'],
+        message=MessageSegmentSend.at(event.sender.user_id) + event.message
+    )
 
 
 async def main():
-    interactor.handlers.append(print_event)
-    interactor.handlers.append(echo)
-    await interactor.connect()
+    await itat.connect(asyncio.get_event_loop())
+    itat.handlers.append(bot)
 
 
 asyncio.get_event_loop().create_task(main())

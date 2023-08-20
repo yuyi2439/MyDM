@@ -4,11 +4,15 @@
 
 import asyncio
 import sys
+from typing import Any, Callable
 
+from .event import *
 from .exceptions import ApiCallTimeout
 
 __all__ = [
     'EchoHandler',
+    'EventHandler',
+    'event_handler_sort',
 ]
 
 
@@ -46,3 +50,47 @@ class EchoHandler:
             raise ApiCallTimeout
         finally:
             cls._echos.pop(echo)
+
+
+class EventHandler:
+    def __init__(
+        self, handler: Callable[['Event'], Any], 
+        priority: int = 0,
+        condition: dict | None = None
+        ):
+        self.handler = handler
+        self.priority = priority
+        self.condition = condition or {}
+    
+    def assert_condition(self, condition: dict) -> bool:
+        """判断condition"""
+        try:
+            for key, value in self.condition.items():
+                if condition[key] != value:
+                    return False
+        except KeyError:
+            return False
+        return True
+    
+    def __call__(self, raw_event: 'Event') -> Any:
+        post_type = self.condition.get('post_type')
+        if post_type == 'message' or post_type == 'message_sent':
+            return self.handler(EventMessage(raw_event))
+        elif post_type == 'request':
+            return self.handler(EventRequest(raw_event))
+        elif post_type == 'notice':
+            return self.handler(EventNotice(raw_event))
+        elif post_type == 'meta_event':
+            return self.handler(EventMeta(raw_event))
+        else:
+            return self.handler(raw_event)
+
+
+def event_handler_sort(handlers: list[EventHandler]) -> list[EventHandler]:
+    """事件处理器排序"""
+    def key(handler: EventHandler):
+        value = handler.priority
+        return (True, 0) if value == 0 else (value < 0, abs(value))
+    sorted_handlers = [k for k in sorted(handlers, key=key)]
+    return sorted_handlers
+

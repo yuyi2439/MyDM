@@ -6,22 +6,53 @@ Bot提供on（及其附属）装饰器，接收优先级，并注册handler
 """
 
 
-from typing import Any, Callable
+from typing import Any, Callable, get_type_hints
 
+from .utils import event_handler_sort, EventHandler
 from .event import Event
-from .exceptions import TruncateEventProcessing
+from .exceptions import StopEventProcessing
+
+__all__ = [
+    'Bot',
+]
 
 
 class Bot:
     def __init__(self):
-        self.handlers: list[Callable[['Event'], Any]] = []
+        self.handlers: list[EventHandler] = []
 
-    def __call__(self, event: 'Event'):
+    async def __call__(self, event: 'Event'):
+        """
+        根据优先级依次执行处理函数
+        """
+        sorted_handlers = event_handler_sort(self.handlers)
         try:
-            for handler in self.handlers:
-                handler(event)
-        except TruncateEventProcessing:
-            pass
+            for handler in sorted_handlers:
+                if handler.assert_condition(event):
+                    await handler(event)
+                else:
+                    # TODO 这里应该弄一个warn的log
+                    pass
+        except StopEventProcessing:
+            return
 
-    def on(self, priority: int, handler: Callable):
-        pass  # TODO
+    def on(
+        self,
+        *,
+        priority: int = 0,
+        **condition
+    ) -> Callable:
+        """注册事件处理函数
+        - `priority`: 优先级：正数中，越小优先级越高；0为无优先级，其次执行；负数最后执行；如果优先级冲突，则按照添加顺序执行
+        - `**condition`: 事件满足条件才会触发
+        """
+        def decorator(func: Callable[['Event'], Any]):
+            type_hints = get_type_hints(func)
+            if 'return' in type_hints:
+                type_hints.pop('return')
+            if len(type_hints.items()) != 1:
+                raise TypeError('Handler function must have only one arg')
+            self.handlers.append(EventHandler(func, priority=priority, condition=condition))
+            return func
+
+        return decorator

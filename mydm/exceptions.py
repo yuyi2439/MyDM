@@ -29,5 +29,5 @@ class DataFormatError(TypeError):
     """数据格式错误"""
 
 
-class TruncateEventProcessing(Exception):
+class StopEventProcessing(Exception):
     """截停事件处理"""

@@ -37,7 +37,8 @@ __all__ = [
 
 class Interactor:
     def __init__(
-        self, url: str, *,
+        self, url: str, 
+        *,
         access_token: str = '',
     ):
 
@@ -48,7 +49,8 @@ class Interactor:
 
 class InteractorApi(Interactor, ABC):
     def __init__(
-        self, url: str, *,
+        self, url: str, 
+        *,
         access_token: str = '',
         timeout: float = 10
     ):
@@ -63,18 +65,19 @@ class InteractorApi(Interactor, ABC):
 
 class InteractorEvent(Interactor, ABC):
     def __init__(
-        self, url: str, *,
+        self, url: str, 
+        *,
         access_token: str = '',
     ):
         super().__init__(url, access_token=access_token)
         self.handlers: list[Callable[['Event'], Any]] = []
 
     @abstractmethod
-    async def _receive(self):
+    async def _receiver(self):
         """接收Event"""
 
-    async def receive(self):
-        asyncio.get_event_loop().create_task(self._receive())
+    async def receive(self, event_loop: asyncio.AbstractEventLoop):
+        event_loop.create_task(self._receiver())
 
 
 class InteractorHttpApi(InteractorApi):
@@ -95,17 +98,18 @@ class InteractorHttpEvent(InteractorApi):
 
 class InteractorWebSocket(InteractorApi, InteractorEvent):
     def __init__(
-        self, url: str, *,
+        self, url: str, 
+        *,
         access_token: str = '',
         timeout: float = 10
     ):
         super().__init__(url, access_token=access_token, timeout=timeout)
         self.conn = False
 
-    async def connect(self):
+    async def connect(self, event_loop: asyncio.AbstractEventLoop):
         self.ws_session = await self.session.ws_connect(self.url)
         self.conn = True
-        await self.receive()
+        await self.receive(event_loop)
 
     async def close(self):
         if not self.conn:
@@ -130,14 +134,13 @@ class InteractorWebSocket(InteractorApi, InteractorEvent):
         resp = ApiResponse(resp)
         return resp
 
-    async def _receive(self):
+    async def _receiver(self):
         while True:
             data = await self.ws_session.receive_json()
             if data.get('echo') is None:
                 # 正常上报
                 event = Event(data)
-                if isinstance(event, Event):
-                    asyncio.gather(handler(event) for handler in self.handlers)
+                asyncio.gather(*[handler(event) for handler in self.handlers])
             else:
                 # echo上报
                 EchoHandler.set(data)

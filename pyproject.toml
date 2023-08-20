@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mydm"
-version = "0.0.2"
+version = "0.0.3a1"
 description = "一个使用OneBot v11/12协议的机器人框架"
 authors = ["yuyi2439 <yuyi2439@qq.com>"]
 license = "Apache-2.0"
@@ -11,7 +11,12 @@ repository = "https://github.com/yuyi2439/MyDM"
 [tool.poetry.dependencies]
 python = "^3.9"
 aiohttp = "^3.8.5"
-ujson = {version = "^5.8.0", extras = ["all"]}
+
+ujson = {version = "^5.8.0", optional = true}
+
+
+[tool.poetry.extras]
+all = ["ujson"]
 
 
 [build-system]

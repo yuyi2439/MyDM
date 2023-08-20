@@ -27,6 +27,7 @@ class ApiResponse(dict):
         if isinstance(resp, str):
             resp = json.loads(resp)
         if isinstance(resp, str):
+            # Pylance无法识别，只好这样
             raise
         try:
             retcode = resp['retcode']
@@ -35,7 +36,7 @@ class ApiResponse(dict):
                 self.update(resp['data'])
             elif retcode == 1:
                 # api已提交 async 处理
-                self.update({})
+                pass
             else:
                 # 操作失败
                 raise ApiCallFailed(resp['msg'], resp['wording'])
