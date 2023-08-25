@@ -82,7 +82,7 @@ class EventHandler:
         if isinstance(post_type, list):
             return self.handler(raw_event)
         match post_type:
-            case 'message', 'message_sent':
+            case 'message' | 'message_sent':
                 return self.handler(EventMessage(raw_event))
             case 'request':
                 return self.handler(EventRequest(raw_event))
