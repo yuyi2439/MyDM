@@ -4,9 +4,9 @@
 
 from typing import Literal
 
-from .type import Sender
-from .message import Message
-from .exceptions import DataFormatError
+from mydm.type import POST_TYPE, Sender
+from mydm.message import Message
+from mydm.exceptions import DataFormatError
 
 __all__ = [
     'Event',
@@ -43,7 +43,7 @@ class Event(dict):
         return self['self_id']
 
     @property
-    def post_type(self) -> Literal['message', 'message_sent', 'request', 'notice', 'meta_event']:
+    def post_type(self) -> POST_TYPE:
         """上报类型"""
         return self['post_type']
 
@@ -59,7 +59,9 @@ class EventMessage(Event):
         """
         super().__init__(data)
         try:
-            _ = self.post_type, self.message_type, self.sub_type, self.message_id, self.user_id, self.message, self.raw_message, self.font, self.sender
+            self._message = Message(self['message'])
+            self._sender = Sender(self['sender'])
+            _ = self.post_type, self.message_type, self.sub_type, self.message_id, self.user_id, self.raw_message, self.font
         except KeyError as e:
             raise DataFormatError(e)
 
@@ -91,7 +93,7 @@ class EventMessage(Event):
     @property
     def message(self) -> 'Message':
         """消息内容"""
-        return Message(self['message'])
+        return self._message
 
     @property
     def raw_message(self) -> str:
@@ -106,7 +108,7 @@ class EventMessage(Event):
     @property
     def sender(self) -> 'Sender':
         """消息发送者"""
-        return Sender(self['sender'])
+        return self._sender
 
 
 class EventRequest(Event):

@@ -11,7 +11,7 @@ __all__ = [
 
 
 from typing import Literal
-from .exceptions import DataFormatError
+from mydm.exceptions import DataFormatError
 
 
 class MessageSegment(dict):
@@ -19,10 +19,7 @@ class MessageSegment(dict):
         """
         从dict构建MessageSegment
         """
-        if isinstance(data, MessageSegment):
-            self = data
-        else:
-            super().__init__(data)
+        super().__init__(data)
         try:
             _ = self.type
         except KeyError as e:
@@ -132,8 +129,7 @@ class Message(list[MessageSegment]):
             elif isinstance(segment, dict):
                 self.append(MessageSegment(segment))
             else:
-                raise DataFormatError(
-                    f'{segment} is not a MessageSegment or Message')
+                raise DataFormatError(f'{segment} is not a MessageSegment or Message')
 
     def __add__(self, other):
         """合并Message"""

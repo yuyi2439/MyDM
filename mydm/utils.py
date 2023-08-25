@@ -6,8 +6,8 @@ import asyncio
 import sys
 from typing import Any, Callable
 
-from .event import *
-from .exceptions import ApiCallTimeout
+from mydm.event import *
+from mydm.exceptions import ApiCallTimeout
 
 __all__ = [
     'EchoHandler',
@@ -66,24 +66,32 @@ class EventHandler:
         """判断condition"""
         try:
             for key, value in self.condition.items():
-                if condition[key] != value:
-                    return False
+                if isinstance(value, list):
+                    for v in value:
+                        if condition[key] == v:
+                            return True
+                else:
+                    if condition[key] == value:
+                        return True
         except KeyError:
             return False
-        return True
+        return False
     
-    def __call__(self, raw_event: 'Event') -> Any:
-        post_type = self.condition.get('post_type')
-        if post_type == 'message' or post_type == 'message_sent':
-            return self.handler(EventMessage(raw_event))
-        elif post_type == 'request':
-            return self.handler(EventRequest(raw_event))
-        elif post_type == 'notice':
-            return self.handler(EventNotice(raw_event))
-        elif post_type == 'meta_event':
-            return self.handler(EventMeta(raw_event))
-        else:
+    def __call__(self, raw_event: 'Event'):
+        post_type = self.condition['post_type']
+        if isinstance(post_type, list):
             return self.handler(raw_event)
+        match post_type:
+            case 'message', 'message_sent':
+                return self.handler(EventMessage(raw_event))
+            case 'request':
+                return self.handler(EventRequest(raw_event))
+            case 'notice':
+                return self.handler(EventNotice(raw_event))
+            case 'meta_event':
+                return self.handler(EventMeta(raw_event))
+            case _:
+                return self.handler(raw_event)
 
 
 def event_handler_sort(handlers: list[EventHandler]) -> list[EventHandler]:

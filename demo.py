@@ -5,11 +5,11 @@ from mydm.event import Event, EventMessage
 from mydm.message import MessageSegmentSend
 from mydm.interactor import InteractorWebSocket
 
-itat = InteractorWebSocket('ws://192.168.0.102:8080')
+itat = InteractorWebSocket('(WS地址)')
 bot = Bot()
 
 
-@bot.on()
+@bot.on(post_type=['message', 'request', 'notice'])
 async def print_event(event: 'Event'):
     print(event)
 

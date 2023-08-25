@@ -1,9 +1,10 @@
 __version__ = (0, 0, 2)
 
 
-from .type import *
-from .event import *
-from .utils import *
-from .message import *
-from .interactor import *
-from .exceptions import *
+from mydm import bot
+from mydm import type
+from mydm import event
+from mydm import utils
+from mydm import message
+from mydm import interactor
+from mydm import exceptions

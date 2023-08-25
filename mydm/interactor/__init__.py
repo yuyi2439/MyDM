@@ -20,10 +20,10 @@ try:
 except ImportError:
     import json
 
-from .type import ApiResponse
-from .utils import EchoHandler
-from .event import Event
-from .exceptions import WebSocketNotConnected
+from mydm.type import ApiResponse
+from mydm.utils import EchoHandler
+from mydm.event import Event
+from mydm.exceptions import WebSocketNotConnected
 
 __all__ = [
     'Interactor',

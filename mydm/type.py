@@ -4,7 +4,7 @@
 
 from typing import Literal
 
-from .exceptions import ApiCallFailed, DataFormatError
+from mydm.exceptions import ApiCallFailed, DataFormatError
 
 try:
     import ujson as json
@@ -16,7 +16,11 @@ __all__ = [
     'Sender',
     'SenderTemp',
     'SenderGroup',
+    'POST_TYPE'
 ]
+
+
+POST_TYPE = Literal['message', 'message_sent', 'request', 'notice', 'meta_event']
 
 
 class ApiResponse(dict):
