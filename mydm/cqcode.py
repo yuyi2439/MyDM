@@ -18,6 +18,8 @@ def build(type: str, **data):
     for k in list(data.keys()):
         if data[k] is None:
             data.pop(k)
+        elif isinstance(data[k], int):
+            data[k] = str(data[k])
     return MessageSegmentSend({
         'type': type,
         'data': data
