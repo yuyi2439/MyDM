@@ -41,7 +41,7 @@ class Bot:
         self,
         *,
         priority: int = 0,
-        post_type: POST_TYPE | list[POST_TYPE] | Literal['all'] = 'all',
+        post_type: POST_TYPE | list[POST_TYPE] | None = None,
         **condition: str | list
     ) -> Callable:
         """注册事件处理函数
@@ -55,7 +55,8 @@ class Bot:
                 type_hints.pop('return')
             if len(type_hints.items()) != 1:
                 raise TypeError('Handler function must have only one arg')
-            condition.update({'post_type': post_type})
+            if post_type is not None:
+                condition.update({'post_type': post_type})
             self.handlers.append(EventHandler(func, priority=priority, condition=condition))
             return func
 

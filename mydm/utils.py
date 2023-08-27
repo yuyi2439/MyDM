@@ -64,6 +64,8 @@ class EventHandler:
     
     def assert_condition(self, condition: dict) -> bool:
         """判断condition"""
+        if not self.condition:
+            return True
         try:
             for key, value in self.condition.items():
                 if isinstance(value, list):
@@ -78,9 +80,7 @@ class EventHandler:
         return False
     
     def __call__(self, raw_event: 'Event'):
-        post_type = self.condition['post_type']
-        if isinstance(post_type, list):
-            return self.handler(raw_event)
+        post_type = self.condition.get('post_type')
         match post_type:
             case 'message' | 'message_sent':
                 return self.handler(EventMessage(raw_event))

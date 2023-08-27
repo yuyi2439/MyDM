@@ -2,14 +2,14 @@ import asyncio
 
 from mydm.bot import Bot
 from mydm.event import Event, EventMessage
-from mydm.message import MessageSegmentSend
+from mydm.cqcode import *
 from mydm.interactor import InteractorWebSocket
 
 itat = InteractorWebSocket('(WS地址)')
 bot = Bot()
 
 
-@bot.on(post_type=['message', 'request', 'notice'])
+@bot.on()
 async def print_event(event: 'Event'):
     print(event)
 
@@ -19,7 +19,7 @@ async def echo(event: 'EventMessage'):
     await itat.call(
         'send_group_msg',
         group_id=event['group_id'],
-        message=MessageSegmentSend.at(event.sender.user_id) + event.message
+        message=at(event.sender.user_id) + event.message
     )
 
 
