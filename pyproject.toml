@@ -9,7 +9,7 @@ homepage = "https://github.com/yuyi2439/MyDM"
 repository = "https://github.com/yuyi2439/MyDM"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 aiohttp = "^3.8.5"
 
 ujson = {version = "^5.8.0", optional = true}
