@@ -1,13 +1,12 @@
-"""
-定义实用工具
-"""
-
-import asyncio
 import sys
-from typing import Any, Callable, Coroutine
+import asyncio
+from typing import Any, Callable, Coroutine, TYPE_CHECKING
 
 from mydm.event import *
 from mydm.exceptions import ApiCallTimeout
+
+if TYPE_CHECKING:
+    from asyncio import Future
 
 __all__ = [
     'EchoHandler',
@@ -18,7 +17,7 @@ __all__ = [
 
 class EchoHandler:
     _seq = 0
-    _echos: dict[int, asyncio.Future] = {}
+    _echos: dict[int, 'Future'] = {}
 
     @classmethod
     def next(cls) -> int:
@@ -36,7 +35,7 @@ class EchoHandler:
             future.set_result(data)
 
     @classmethod
-    def add_fut(cls, echo: int):
+    def add_future(cls, echo: int):
         future = asyncio.get_event_loop().create_future()
         cls._echos[echo] = future
 
@@ -54,14 +53,14 @@ class EchoHandler:
 
 class EventHandler:
     def __init__(
-        self, handler: Callable[['Event'], Any], 
+        self, handler: Callable[['Event'], Any],
         priority: int = 0,
         condition: dict | None = None
     ):
         self.handler = handler
         self.priority = priority
         self.condition = condition or {}
-    
+
     def assert_condition(self, condition: dict) -> bool:
         """判断condition"""
         if not self.condition:
@@ -78,7 +77,7 @@ class EventHandler:
         except KeyError:
             return False
         return False
-    
+
     async def __call__(self, raw_event: 'Event'):
         post_type = self.condition.get('post_type')
         match post_type:
@@ -106,4 +105,3 @@ def event_handler_sort(handlers: list[EventHandler]) -> list[EventHandler]:
         return (True, 0) if value == 0 else (value < 0, abs(value))
     sorted_handlers = [k for k in sorted(handlers, key=key)]
     return sorted_handlers
-

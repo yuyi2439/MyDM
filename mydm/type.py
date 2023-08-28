@@ -1,10 +1,9 @@
-"""
-用于放置其余自定义类型
-"""
-
-from typing import Literal
+from typing import Any, Callable, Literal, TYPE_CHECKING, Union
 
 from mydm.exceptions import ApiCallFailed, DataFormatError
+
+if TYPE_CHECKING:
+    from mydm.event import *
 
 try:
     import ujson as json
@@ -20,7 +19,12 @@ __all__ = [
 ]
 
 
-POST_TYPE = Literal['message', 'message_sent', 'request', 'notice', 'meta_event']
+POST_TYPE = Literal[
+    'message', 'message_sent', 'request', 'notice', 'meta_event'
+]
+HANDLER = Callable[
+    [Union['Event', 'EventMessage', 'EventRequest', 'EventNotice', 'EventMeta']], Any
+]
 
 
 class ApiResponse(dict):

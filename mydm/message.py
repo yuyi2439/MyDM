@@ -1,6 +1,5 @@
-"""
-定义所有消息类型
-"""
+from typing import Literal, Optional
+from mydm.exceptions import DataFormatError
 
 __all__ = [
     'MessageSegment',
@@ -10,15 +9,9 @@ __all__ = [
 ]
 
 
-from typing import Literal, Optional
-from mydm.exceptions import DataFormatError
-
-
 class MessageSegment(dict):
     def __init__(self, data: dict):
-        """
-        从dict构建MessageSegment
-        """
+        """从dict构建MessageSegment"""
         super().__init__(data)
         try:
             _ = self.type
@@ -26,9 +19,7 @@ class MessageSegment(dict):
             raise DataFormatError(e)
 
     def __add__(self, __other) -> 'Message':
-        """
-        合并Message
-        """
+        """合并Message"""
         return Message(self, __other)
 
     def __eq__(self, __value: 'MessageSegment') -> bool:
@@ -47,9 +38,7 @@ class MessageSegment(dict):
 
 class MessageSegmentReceive(MessageSegment):
     def __init__(self, data: dict):
-        """
-        从dict构建MessageSegmentReceive
-        """
+        """从dict构建MessageSegmentReceive"""
         super().__init__(data)
         try:
             _ = self.type
@@ -81,9 +70,7 @@ class MessageSegmentSend(MessageSegment):
 
 class Message(list[MessageSegment]):
     def __init__(self, *data):
-        """
-        从dict构建Message
-        """
+        """从dict构建Message"""
         if not data:
             raise DataFormatError('data is empty')
         super().__init__()
@@ -97,7 +84,9 @@ class Message(list[MessageSegment]):
             elif isinstance(segment, dict):
                 self.append(MessageSegment(segment))
             else:
-                raise DataFormatError(f'{segment} is not a MessageSegment or Message')
+                raise DataFormatError(
+                    f'{segment} is not a MessageSegment or Message'
+                )
 
     def __add__(self, __other):
         """合并Message"""

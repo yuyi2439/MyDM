@@ -1,12 +1,12 @@
-"""
-定义Event类型和它的子类型
-"""
+from typing import Literal, TYPE_CHECKING
 
-from typing import Literal
-
-from mydm.type import POST_TYPE, Sender
+from mydm.type import Sender
 from mydm.message import Message
 from mydm.exceptions import DataFormatError
+
+if TYPE_CHECKING:
+    from mydm.type import POST_TYPE
+
 
 __all__ = [
     'Event',
@@ -18,9 +18,7 @@ __all__ = [
 
 
 class Event(dict):
-    """
-    事件
-    """
+    """事件"""
 
     def __init__(self, data: dict):
         """
@@ -43,7 +41,7 @@ class Event(dict):
         return self['self_id']
 
     @property
-    def post_type(self) -> POST_TYPE:
+    def post_type(self) -> 'POST_TYPE':
         """上报类型"""
         return self['post_type']
 

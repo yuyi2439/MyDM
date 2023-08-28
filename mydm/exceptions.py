@@ -1,12 +1,9 @@
-"""
-定义所有自定义Exception和Error
-"""
-
 __all__ = [
     'ApiCallFailed',
     'ApiCallTimeout',
     'WebSocketNotConnected',
     'DataFormatError',
+    'StopEventProcessing',
 ]
 
 
