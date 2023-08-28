@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mydm"
-version = "0.0.3a4"
+version = "0.0.4"
 description = "一个使用OneBot v11/12协议的机器人框架"
 authors = ["yuyi2439 <yuyi2439@qq.com>"]
 license = "MIT"
