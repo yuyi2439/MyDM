@@ -6,7 +6,7 @@ Bot提供on（及其附属）装饰器，接收优先级，并注册handler
 """
 
 
-from typing import Any, Callable, Literal, get_type_hints
+from typing import Any, Callable
 
 from mydm.type import POST_TYPE
 from mydm.utils import event_handler_sort, EventHandler
@@ -22,7 +22,7 @@ class Bot:
     def __init__(self):
         self.handlers: list[EventHandler] = []
 
-    async def __call__(self, event: 'Event'):
+    async def __call__(self, event: 'Event') -> None:
         """
         根据优先级依次执行处理函数
         """
@@ -31,9 +31,6 @@ class Bot:
             for handler in sorted_handlers:
                 if handler.assert_condition(event):
                     await handler(event)
-                else:
-                    # TODO 这里应该弄一个warn的log
-                    pass
         except StopEventProcessing:
             return
 
@@ -50,10 +47,7 @@ class Bot:
         - `**condition`: 事件满足条件才会触发
         """
         def decorator(func: Callable[['Event'], Any]):
-            type_hints = get_type_hints(func)
-            if 'return' in type_hints:
-                type_hints.pop('return')
-            if len(type_hints.items()) != 1:
+            if func.__code__.co_argcount != 1:
                 raise TypeError('Handler function must have only one arg')
             if post_type is not None:
                 condition.update({'post_type': post_type})

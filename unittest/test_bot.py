@@ -1,14 +1,37 @@
 import unittest
+import asyncio
 
 from mydm.bot import Bot
 from mydm.event import Event
 
+base_event = Event({
+    'time': 123, 
+    'self_id': 114514, 
+    'post_type': 'message'
+})
+
 
 class TestBot(unittest.TestCase):
-    async def test_when_post_type_is_None(self):
+    def test_when_post_type_is_None(self):
         bot = Bot()
-        @bot.on(priority=1)
-        def _(event):
+        @bot.on()
+        async def _(event: 'Event'):
+            self.assertEqual(event, base_event)
             return event
-        r = await bot(Event({'msg': 'test'}))
-        self.assertTrue(r == Event({'msg': 'test'}))
+        asyncio.run(bot(base_event))
+    
+    def test_handler_without_async(self):
+        bot = Bot()
+        @bot.on()
+        def _(event: 'Event'):
+            self.assertTrue(True)
+            return event
+        asyncio.run(bot(base_event))
+    
+    def test_when_handler_no_type_hint(self):
+        bot = Bot()
+        @bot.on()
+        async def _(event):
+            self.assertTrue(True)
+            return event
+        asyncio.run(bot(base_event))

@@ -4,7 +4,7 @@
 
 import asyncio
 import sys
-from typing import Any, Callable
+from typing import Any, Callable, Coroutine
 
 from mydm.event import *
 from mydm.exceptions import ApiCallTimeout
@@ -57,7 +57,7 @@ class EventHandler:
         self, handler: Callable[['Event'], Any], 
         priority: int = 0,
         condition: dict | None = None
-        ):
+    ):
         self.handler = handler
         self.priority = priority
         self.condition = condition or {}
@@ -79,19 +79,24 @@ class EventHandler:
             return False
         return False
     
-    def __call__(self, raw_event: 'Event'):
+    async def __call__(self, raw_event: 'Event'):
         post_type = self.condition.get('post_type')
         match post_type:
             case 'message' | 'message_sent':
-                return self.handler(EventMessage(raw_event))
+                event = EventMessage(raw_event)
             case 'request':
-                return self.handler(EventRequest(raw_event))
+                event = EventRequest(raw_event)
             case 'notice':
-                return self.handler(EventNotice(raw_event))
+                event = EventNotice(raw_event)
             case 'meta_event':
-                return self.handler(EventMeta(raw_event))
+                event = EventMeta(raw_event)
             case _:
-                return self.handler(raw_event)
+                event = raw_event
+        handler = self.handler(event)
+        if isinstance(handler, Coroutine):
+            return await handler
+        else:
+            return handler
 
 
 def event_handler_sort(handlers: list[EventHandler]) -> list[EventHandler]:
